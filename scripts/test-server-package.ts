@@ -26,17 +26,20 @@ for (let ancestor = temporaryRoot; ; ancestor = dirname(ancestor)) {
 const relocated = join(temporaryRoot, 'package')
 cpSync(distribution, relocated, { recursive: true, dereference: true })
 console.log(`Validating relocated package: ${relocated}`)
+const packageEnvironment = { ...process.env }
+delete packageEnvironment.NODE_PATH
 const result = spawnSync(join(relocated, 'vendor/bun/bun'), [
   '--no-install',
   'test',
   './packages/server-core/src/runtime/platform-headless-image.test.ts',
+  './packages/server-core/src/runtime/mcp-package.test.ts',
 ], {
   cwd: relocated,
   stdio: 'inherit',
-  env: { ...process.env, CRAFT_CONFIG_DIR: join(temporaryRoot, 'config') },
+  env: { ...packageEnvironment, CRAFT_CONFIG_DIR: join(temporaryRoot, 'config') },
 })
 if (result.error) throw result.error
 if (result.status !== 0) {
   throw new Error(`Relocated package validation failed (${result.status ?? result.signal}); preserved at ${relocated}`)
 }
-console.log('Relocated package native image checks passed; artifact preserved for inspection.')
+console.log('Relocated package native image and MCP runtime checks passed; artifact preserved for inspection.')
