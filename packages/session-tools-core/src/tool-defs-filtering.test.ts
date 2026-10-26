@@ -74,3 +74,21 @@ describe('session tool filtering helpers', () => {
     expect(blockedPrefixed.has('mcp__session__spawn_session')).toBe(true);
   });
 });
+
+describe('session JSON schemas after the Zod 4 security upgrade', () => {
+  it('keeps required input fields and nested permission constraints', () => {
+    const defs = getToolDefsAsJsonSchema({ includeDeveloperFeedback: true });
+    for (const def of defs) {
+      expect(def.inputSchema.type).toBe('object');
+      expect(Object.keys(def.inputSchema.properties as object).length).toBeGreaterThan(0);
+    }
+    const plan = defs.find(def => def.name === 'SubmitPlan')!;
+    expect(plan.inputSchema.required).toEqual(['planPath']);
+    const spawn = defs.find(def => def.name === 'spawn_session')!;
+    const props = spawn.inputSchema.properties as Record<string, { enum?: string[] }>;
+    expect(props.permissionMode.enum).toEqual(['safe', 'ask', 'allow-all']);
+    const sandbox = defs.find(def => def.name === 'script_sandbox')!;
+    const sandboxProps = sandbox.inputSchema.properties as Record<string, { maximum?: number }>;
+    expect(sandboxProps.timeoutMs.maximum).toBe(15000);
+  });
+});
