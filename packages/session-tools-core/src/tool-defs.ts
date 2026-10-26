@@ -12,7 +12,6 @@
  */
 
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { SessionToolContext } from './context.ts';
 import type { ToolResult } from './types.ts';
 
@@ -585,9 +584,7 @@ export function getToolDefsAsJsonSchema(opts?: {
   const defs = getSessionToolDefs({ includeDeveloperFeedback: opts?.includeDeveloperFeedback });
 
   return defs.map(def => {
-    // Explicit `as any` avoids TS2589 ("type instantiation is excessively deep")
-    // caused by zodToJsonSchema inferring deep generic chains from union schemas.
-    const jsonSchema = zodToJsonSchema(def.inputSchema as any, { $refStrategy: 'none' }) as Record<string, unknown>;
+    const jsonSchema = z.toJSONSchema(def.inputSchema, { target: 'draft-7', io: 'input' }) as Record<string, unknown>;
     // Strip metadata not needed by MCP/Pi consumers
     delete jsonSchema.$schema;
     delete jsonSchema.additionalProperties;
