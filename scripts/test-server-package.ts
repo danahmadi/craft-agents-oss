@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import { validateSessionMcpPackage } from './validate-session-mcp-package.ts'
 
 const sourceRoot = realpathSync(resolve(dirname(fileURLToPath(import.meta.url)), '..'))
 const distribution = resolve(process.argv[2] ?? 'dist/server')
@@ -42,4 +43,5 @@ if (result.error) throw result.error
 if (result.status !== 0) {
   throw new Error(`Relocated package validation failed (${result.status ?? result.signal}); preserved at ${relocated}`)
 }
+await validateSessionMcpPackage(relocated, temporaryRoot)
 console.log('Relocated package native image and MCP runtime checks passed; artifact preserved for inspection.')
