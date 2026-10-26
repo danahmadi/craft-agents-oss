@@ -285,6 +285,8 @@ function copyProductionDeps(config: ServerBuildConfig): void {
     `@img/sharp-${platform === 'darwin' ? 'darwin' : 'linux'}-${arch}`,
     `@img/sharp-libvips-${platform === 'darwin' ? 'darwin' : 'linux'}-${arch}`,
     '@img/colour',
+    'detect-libc',
+    'semver',
     // WebSocket
     'ws',
     // Caching
