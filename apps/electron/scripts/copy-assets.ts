@@ -11,11 +11,12 @@
  * Run: bun scripts/copy-assets.ts
  */
 
-import { cpSync, copyFileSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { copyFileSync } from 'fs';
+import { join, resolve } from 'path';
+import { copyElectronResources } from '../../../scripts/electron-resources.ts';
 
 // Copy all resources (icons, themes, docs, permissions, tool-icons, etc.)
-cpSync('resources', 'dist/resources', { recursive: true });
+copyElectronResources(resolve(import.meta.dir, '../../..'));
 
 console.log('✓ Copied resources/ → dist/resources/');
 
