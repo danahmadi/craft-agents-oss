@@ -1,0 +1,80 @@
+diff --git a/dist/markitdown.cjs b/dist/markitdown.cjs
+--- a/dist/markitdown.cjs
++++ b/dist/markitdown.cjs
+@@ -296,7 +296,7 @@
+ // src/converters/rss.ts
+ var import_promises = __toESM(require("fs/promises"), 1);
+ var import_node_html_parser2 = require("node-html-parser");
+-var import_xmldom = require("xmldom");
++var import_xmldom = require("@xmldom/xmldom");
+ var RSSConverter = class extends HtmlConverter {
+   constructor() {
+     super();
+@@ -316,7 +316,12 @@
+     }
+     try {
+       const content = await import_promises.default.readFile(localPath, "utf-8");
+-      const parser = new import_xmldom.DOMParser();
++      const rejectInvalidXml = (message) => { throw new Error(message); };
++      const parser = new import_xmldom.DOMParser({ errorHandler: {
++        warning: rejectInvalidXml,
++        error: rejectInvalidXml,
++        fatalError: rejectInvalidXml
++      } });
+       const doc = parser.parseFromString(content, "text/xml");
+       let result = null;
+       if (doc.getElementsByTagName("rss").length) {
+@@ -525,11 +530,9 @@
+     childNodes.forEach((item) => {
+       if (item.tagName) {
+         const attributes = {};
+-        Object.entries(item.attributes || []).forEach(
+-          ([key, value]) => attributes[key] = ` ${value}`
++        Array.from(item.attributes || []).forEach(
++          (attribute, index) => attributes[index] = ` ${attribute}`
+         );
+-        if (attributes._ownerElement) delete attributes._ownerElement;
+-        if (attributes.length) delete attributes.length;
+         const hasChildren = Array.from(item.childNodes || []).length > 1;
+         mdContent += `
+  ${tabs}- ${item.tagName}: ${!hasChildren ? item.textContent : ""}`;
+diff --git a/dist/markitdown.js b/dist/markitdown.js
+--- a/dist/markitdown.js
++++ b/dist/markitdown.js
+@@ -241,7 +241,7 @@
+ // src/converters/rss.ts
+ import fs3 from "fs/promises";
+ import { parse as parse2 } from "node-html-parser";
+-import { DOMParser } from "xmldom";
++import { DOMParser } from "@xmldom/xmldom";
+ var RSSConverter = class extends HtmlConverter {
+   constructor() {
+     super();
+@@ -261,7 +261,12 @@
+     }
+     try {
+       const content = await fs3.readFile(localPath, "utf-8");
+-      const parser = new DOMParser();
++      const rejectInvalidXml = (message) => { throw new Error(message); };
++      const parser = new DOMParser({ errorHandler: {
++        warning: rejectInvalidXml,
++        error: rejectInvalidXml,
++        fatalError: rejectInvalidXml
++      } });
+       const doc = parser.parseFromString(content, "text/xml");
+       let result = null;
+       if (doc.getElementsByTagName("rss").length) {
+@@ -470,11 +475,9 @@
+     childNodes.forEach((item) => {
+       if (item.tagName) {
+         const attributes = {};
+-        Object.entries(item.attributes || []).forEach(
+-          ([key, value]) => attributes[key] = ` ${value}`
++        Array.from(item.attributes || []).forEach(
++          (attribute, index) => attributes[index] = ` ${attribute}`
+         );
+-        if (attributes._ownerElement) delete attributes._ownerElement;
+-        if (attributes.length) delete attributes.length;
+         const hasChildren = Array.from(item.childNodes || []).length > 1;
+         mdContent += `
+  ${tabs}- ${item.tagName}: ${!hasChildren ? item.textContent : ""}`;

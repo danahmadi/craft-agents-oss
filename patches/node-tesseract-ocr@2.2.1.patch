@@ -1,0 +1,49 @@
+diff --git a/src/index.js b/src/index.js
+index ff8fd67e6b16c135a7ab33873ec7e1e59b18ec76..90885c09abab81210a555dccd1920ee7ab6d1a84 100755
+--- a/src/index.js
++++ b/src/index.js
+@@ -1,4 +1,4 @@
+-const exec = require("child_process").exec
++const execFile = require("child_process").execFile
+ const log = console.debug
+ 
+ /**
+@@ -10,13 +10,13 @@ function recognize(input, config = {}) {
+   const options = getOptions(config)
+   const binary = config.binary || "tesseract"
+   const isSingleLocalFile = typeof input === "string" && !input.match(/^https?:\/\//)
+-  const inputOption = isSingleLocalFile ? `"${input}"` : "stdin"
+-  const command = [binary, inputOption, "stdout", ...options].join(" ")
++  const inputOption = isSingleLocalFile ? input : "stdin"
++  const args = [inputOption, "stdout", ...options]
+ 
+-  if (config.debug) log("command", command)
++  if (config.debug) log("command", binary, args)
+ 
+   return new Promise((resolve, reject) => {
+-    const child = exec(command, (error, stdout, stderr) => {
++    const child = execFile(binary, args, (error, stdout, stderr) => {
+       if (config.debug) log(stderr)
+       if (error) reject(error)
+       resolve(stdout)
+@@ -42,14 +42,14 @@ function getOptions(config) {
+   const ocrOptions = ["tessdata-dir", "user-words", "user-patterns", "psm", "oem", "dpi"]
+ 
+   return Object.entries(config)
+-    .map(([key, value]) => {
+-      if (["debug", "presets", "binary"].includes(key)) return
+-      if (key === "lang") return `-l ${value}`
+-      if (ocrOptions.includes(key)) return `--${key} ${value}`
++    .flatMap(([key, value]) => {
++      if (["debug", "presets", "binary"].includes(key)) return []
++      if (key === "lang") return ["-l", String(value)]
++      if (ocrOptions.includes(key)) return [`--${key}`, String(value)]
+ 
+-      return `-c ${key}=${value}`
++      return ["-c", `${key}=${value}`]
+     })
+-    .concat(config.presets) // options -l and --psm must occur before any CONFIGFILE
++    .concat(config.presets || []) // options -l and --psm must occur before any CONFIGFILE
+     .filter(Boolean)
+ }
+ 
