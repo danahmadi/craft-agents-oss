@@ -86,9 +86,9 @@ describe('session JSON schemas after the Zod 4 security upgrade', () => {
     expect(plan.inputSchema.required).toEqual(['planPath']);
     const spawn = defs.find(def => def.name === 'spawn_session')!;
     const props = spawn.inputSchema.properties as Record<string, { enum?: string[] }>;
-    expect(props.permissionMode.enum).toEqual(['safe', 'ask', 'allow-all']);
+    expect(props.permissionMode?.enum).toEqual(['safe', 'ask', 'allow-all']);
     const sandbox = defs.find(def => def.name === 'script_sandbox')!;
     const sandboxProps = sandbox.inputSchema.properties as Record<string, { maximum?: number }>;
-    expect(sandboxProps.timeoutMs.maximum).toBe(15000);
+    expect(sandboxProps.timeoutMs?.maximum).toBe(15000);
   });
 });
