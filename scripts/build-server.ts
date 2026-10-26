@@ -277,6 +277,13 @@ function copyProductionDeps(config: ServerBuildConfig): void {
     '@anthropic-ai/claude-agent-sdk',
     // MCP protocol
     '@modelcontextprotocol/sdk',
+    // MCP validation and HTTP transports (hoisted runtime dependencies).
+    'ajv-formats',
+    'fast-deep-equal',
+    'fast-uri',
+    'eventsource-parser',
+    'pkce-challenge',
+    '@hono/node-server',
     // Schema validation
     'zod',
     'zod-to-json-schema',
